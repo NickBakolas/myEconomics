@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from collections import defaultdict
+import tkinter as tk  # ΠΡΟΣΘΗΚΗ: Αν δεν υπάρχει ήδη
 
 def create_chart1(master, main_app):
     expenses = main_app.get_expense()
@@ -27,7 +28,7 @@ def create_chart1(master, main_app):
     # Δημιουργία μπάρας
     bars = ax.bar(categories, num_euros, color='#a83232')
 
-    ax.set_title("Μηνιαία Έξοδα ανά Κατηγορία")
+    ax.set_title("Μηνιαία Έξοδα ανά Κατηγορία", loc= 'left')
     ax.set_ylabel("Ευρώ")
     ax.set_xticks(range(len(categories)))
     ax.set_xticklabels(categories, rotation=30, ha='right')
@@ -41,7 +42,13 @@ def create_chart1(master, main_app):
                     textcoords="offset points",
                     ha='center', va='bottom', fontsize=8)
 
-    canvas = FigureCanvasTkAgg(fig, master=master)
+    # Δημιουργία container
+    container = tk.Frame(master)
+    container.grid(row=0, column=0, sticky='nsew')  # ή .pack() αν προτιμάς
+
+    canvas = FigureCanvasTkAgg(fig, master=container)
     canvas.draw()
-    return canvas.get_tk_widget()
+    canvas.get_tk_widget().pack(fill='both', expand=True)
+
+    return container
 

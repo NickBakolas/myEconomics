@@ -3,15 +3,21 @@ from datetime import datetime
 
 def format_date(date):
     if isinstance(date, datetime):
-        return date.strftime("%Y-%m-%d")
+        return date.strftime("%d-%m-%Y")
     elif isinstance(date, str):
-        for fmt in ("%Y-%m-%d", "%d-%m-%Y"):
+        try:
+            # Αν έρχεται από tkcalendar
+            date_obj = datetime.strptime(date, "%Y-%m-%d")
+            return date_obj.strftime("%d-%m-%Y")
+        except ValueError:
             try:
-                date_obj = datetime.strptime(date, fmt)
-                return date_obj.strftime("%Y-%m-%d")
-            except ValueError:
-                continue
-        raise ValueError(f"Μη έγκυρη μορφή ημερομηνίας: {date}")
+                date_obj = datetime.strptime(date, "%d-%m-%Y")
+                return date_obj.strftime("%d-%m-%Y")
+            except ValueError as e:
+                raise ValueError(f"Μη έγκυρη μορφή ημερομηνίας: {date}") from e
+    else:
+        raise TypeError(
+            "Η ημερομηνία πρέπει να είναι string ή αντικείμενο datetime.")
 
 
 

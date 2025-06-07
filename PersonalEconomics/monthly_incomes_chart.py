@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from collections import defaultdict
+import tkinter as tk  # Βεβαιώσου ότι έχει γίνει import
 
 def create_chart3(master, main_app):
     try:
@@ -43,13 +44,19 @@ def create_chart3(master, main_app):
            autopct='%1.1f%%',
            startangle=90,
            shadow=True,
-           radius=0.9)  # Προαιρετική μικρή μείωση ακτίνας
+           radius=0.9)
     ax.axis('equal')
-    plt.title("Έσοδα ανά Κατηγορία")
+    plt.title("Μηνιαία Έσοδα ανά Κατηγορία", loc= 'left')
 
-    canvas = FigureCanvasTkAgg(fig, master=master)
+    # Δημιουργία container και τοποθέτηση του καμβά
+    container = tk.Frame(master)
+    container.grid(row=0, column=0, sticky='nsew')  # ή .pack() αν προτιμάς
+
+    canvas = FigureCanvasTkAgg(fig, master=container)
     canvas.draw()
-    return canvas.get_tk_widget()
+    canvas.get_tk_widget().pack(fill='both', expand=True)
+
+    return container
 
 
 

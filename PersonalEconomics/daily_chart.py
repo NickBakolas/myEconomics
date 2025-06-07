@@ -1,31 +1,25 @@
-# --- Αρχικά imports ---
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import tkinter as tk
+import helpers
+
 
 def daily_bar_chart(parent, main_instance, date):
-    from datetime import datetime
 
-    if isinstance(date, str):
-        try:
-            date = datetime.strptime(date, "%d-%m-%Y").strftime("%Y-%m-%d")
-        except ValueError:
-            try:
-                date = datetime.strptime(date, "%Y-%m-%d").strftime("%Y-%m-%d")
-            except ValueError:
-                print("⚠️ Μη έγκυρη μορφή ημερομηνίας:", date)
-                return tk.Frame(parent)
+    date = helpers.format_date(date)
 
-    print("🔍 Μετασχηματισμένη ημερομηνία για SQL:", date)
-
+    print(date)
     income_result = main_instance.get_incomes_by_date(date)
+    print(income_result)
     expense_result = main_instance.get_expenses_by_date(date)
 
     print("Raw income result:", income_result)
     print("Raw expense result:", expense_result)
 
-    income = sum(float(entry[2]) for entry in income_result['data']) if income_result['success'] else 0.0
-    expenses = sum(float(entry[2]) for entry in expense_result['data']) if expense_result['success'] else 0.0
+    income = sum(float(entry[2]) for entry in income_result['data']
+                 ) if income_result['success'] else 0.0
+    expenses = sum(float(entry[2]) for entry in expense_result['data']
+                   ) if expense_result['success'] else 0.0
 
     print("Income:", income)
     print("Expenses:", expenses)

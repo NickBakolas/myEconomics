@@ -60,6 +60,7 @@ def open_expense_window(main_app):
     expense_window.title("Καταχώρηση Δαπάνης")
     expense_window.configure(bg="white")
 
+
     tk.Label(expense_window, text="Καταχώρηση νέας δαπάνης", font=(
         "Arial", 16, "bold"), bg="white").pack(anchor='nw', padx=20, pady=15)
 
