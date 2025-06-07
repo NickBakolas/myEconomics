@@ -1,16 +1,20 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from tkcalendar import Calendar
-from models.expense import Expense
 from datetime import datetime
+from models.expense import Expense
 from category_manager import open_category_manager
 from helpers import refresh_all_charts
 
-
-expense_window_ref = None  # Για αποφυγή διπλού ανοίγματος παραθύρου
+# Μεταβλητή αναφοράς στο παράθυρο, ώστε να μην ανοίγει δεύτερη φορά
+expense_window_ref = None
 
 
 def submit_expense(main_app, name, amount, category_id, date, is_recurring):
+    """
+    Δημιουργεί και προσθέτει μια νέα δαπάνη στην εφαρμογή.
+    Περιλαμβάνει έλεγχο εγκυρότητας ποσού και μορφής ημερομηνίας.
+    """
     try:
         value = float(amount)
     except ValueError:
@@ -19,9 +23,10 @@ def submit_expense(main_app, name, amount, category_id, date, is_recurring):
 
     if isinstance(date, str):
         try:
+            # Αν η ημερομηνία είναι string, την μετατρέπουμε σε format yyyy-mm-dd
             date = datetime.strptime(date, "%d-%m-%Y").strftime("%Y-%m-%d")
         except ValueError:
-            pass
+            pass  # Αν ήδη έχει σωστό format, δεν κάνουμε τίποτα
 
     expense = Expense(
         name=name,
@@ -34,66 +39,57 @@ def submit_expense(main_app, name, amount, category_id, date, is_recurring):
     try:
         res = main_app.add_expense(expense)
         if not res["success"]:
-            msg = '\n'.join(res['errors'])
-            messagebox.showerror(
-                "Error",  msg)
+            messagebox.showerror("Σφάλμα", '\n'.join(res['errors']))
             return
-        main_app.refresh_chart1()
-        print(
-            f"✅ Καταχωρήθηκε: {value}€ - Κατηγορία ID {category_id} - {date}")
-        messagebox.showinfo(
-            "Επιτυχία", "Η δαπάνη καταχωρήθηκε με επιτυχία!")
-
+        messagebox.showinfo("Επιτυχία", "Η δαπάνη καταχωρήθηκε με επιτυχία!")
     except Exception as e:
         messagebox.showerror("Σφάλμα", str(e))
 
 
 def open_expense_window(main_app):
+    """
+    Δημιουργεί και εμφανίζει το παράθυρο καταχώρησης νέας δαπάνης.
+    Προσθέτει πεδία για όνομα, ποσό, κατηγορία, ημερομηνία και μηνιαία σήμανση.
+    """
     global expense_window_ref
 
-    if expense_window_ref is not None and expense_window_ref.winfo_exists():
+    # Αν το παράθυρο είναι ήδη ανοιχτό, το φέρνουμε στο προσκήνιο
+    if expense_window_ref and expense_window_ref.winfo_exists():
         expense_window_ref.lift()
         return
 
+    # Δημιουργία νέου παραθύρου
     expense_window = tk.Toplevel()
     expense_window_ref = expense_window
     expense_window.title("Καταχώρηση Δαπάνης")
     expense_window.configure(bg="white")
 
+    # Επικεφαλίδα
+    tk.Label(expense_window, text="Καταχώρηση νέας δαπάνης", font=("Arial", 16, "bold"), bg="white").pack(anchor='nw', padx=20, pady=15)
 
-    tk.Label(expense_window, text="Καταχώρηση νέας δαπάνης", font=(
-        "Arial", 16, "bold"), bg="white").pack(anchor='nw', padx=20, pady=15)
-
-    tk.Label(expense_window, text="Ονομα:",
-             bg="white").pack(anchor='nw', padx=20)
+    # Πεδία εισαγωγής
+    tk.Label(expense_window, text="Ονομα:", bg="white").pack(anchor='nw', padx=20)
     name_var = tk.StringVar()
-    name_entry = ttk.Entry(expense_window, textvariable=name_var)
-    name_entry.pack(anchor='nw', padx=20, pady=5)
-    tk.Label(expense_window, text="Ποσό (€):",
-             bg="white").pack(anchor='nw', padx=20)
+    ttk.Entry(expense_window, textvariable=name_var).pack(anchor='nw', padx=20, pady=5)
+
+    tk.Label(expense_window, text="Ποσό (€):", bg="white").pack(anchor='nw', padx=20)
     amount_var = tk.StringVar()
-    amount_entry = ttk.Combobox(expense_window, values=[
-                                "10", "20", "50", "100"], textvariable=amount_var)
-    amount_entry['state'] = 'normal'
-    amount_entry.pack(anchor='nw', padx=20, pady=5)
+    ttk.Combobox(expense_window, values=["10", "20", "50", "100"], textvariable=amount_var, state='normal').pack(anchor='nw', padx=20, pady=5)
 
-    tk.Label(expense_window, text="Κατηγορία:",
-             bg="white").pack(anchor='nw', padx=20)
+    # Επιλογή Κατηγορίας
+    tk.Label(expense_window, text="Κατηγορία:", bg="white").pack(anchor='nw', padx=20)
     category_var = tk.StringVar()
-
-    def refresh_categories():
-        nonlocal categories
-        categories = main_app.categories
-        names = [cat[1] for cat in categories] + ["➕ Διαχείριση κατηγοριών"]
-        category_entry['values'] = names
-
-    categories = main_app.categories
-    category_names = [cat[1]
-                      for cat in categories] + ["➕ Διαχείριση κατηγοριών"]
-    category_entry = ttk.Combobox(
-        expense_window, values=category_names, textvariable=category_var)
+    category_entry = ttk.Combobox(expense_window, textvariable=category_var)
     category_entry.pack(anchor='nw', padx=20, pady=5)
 
+    # Ενημέρωση διαθέσιμων κατηγοριών
+    def refresh_categories():
+        categories = main_app.categories
+        category_entry['values'] = [cat[1] for cat in categories] + ["➕ Διαχείριση κατηγοριών"]
+
+    refresh_categories()
+
+    # Άνοιγμα παραθύρου διαχείρισης κατηγοριών αν επιλεγεί η ειδική επιλογή
     def on_category_select(event):
         if category_var.get() == "➕ Διαχείριση κατηγοριών":
             open_category_manager(main_app, refresh_categories)
@@ -101,42 +97,41 @@ def open_expense_window(main_app):
 
     category_entry.bind("<<ComboboxSelected>>", on_category_select)
 
-    tk.Label(expense_window, text="Ημερομηνία:", bg="white").pack(
-        anchor='nw', padx=20, pady=(10, 0))
+    # Ημερολόγιο επιλογής ημερομηνίας
+    tk.Label(expense_window, text="Ημερομηνία:", bg="white").pack(anchor='nw', padx=20, pady=(10, 0))
     cal = Calendar(expense_window, selectmode='day', date_pattern='yyyy-mm-dd')
     cal.pack(anchor='nw', padx=20, pady=5)
 
+    # Επιλογή για επαναλαμβανόμενη δαπάνη
     is_recurring_var = tk.BooleanVar()
-    recurring_check = tk.Checkbutton(
-        expense_window, text="Καταχώρηση ως μηνιαία", variable=is_recurring_var, bg="white")
-    recurring_check.pack(anchor='nw', padx=20, pady=10)
+    tk.Checkbutton(expense_window, text="Καταχώρηση ως μηνιαία", variable=is_recurring_var, bg="white").pack(anchor='nw', padx=20, pady=10)
 
+    # Ενέργεια Υποβολής
     def on_submit():
-        amount = amount_var.get().strip()
         name = name_var.get().strip()
+        amount = amount_var.get().strip()
         category_name = category_var.get().strip()
         date = cal.get_date()
         is_recurring = is_recurring_var.get()
 
-        category_id = next(
-            (cat[0] for cat in categories if cat[1] == category_name), None)
+        # Εύρεση ID κατηγορίας με βάση το όνομα
+        category_id = next((cat[0] for cat in main_app.categories if cat[1] == category_name), None)
 
         if not amount or not category_id:
             messagebox.showwarning("Σφάλμα", "Συμπληρώστε όλα τα πεδία.")
             return
 
-        submit_expense(main_app, name,  amount, category_id, date, is_recurring)
-
+        submit_expense(main_app, name, amount, category_id, date, is_recurring)
         refresh_all_charts(main_app)
-
         expense_window.destroy()
 
-    submit_btn = tk.Button(expense_window, text="Υποβολή", command=on_submit)
-    submit_btn.pack(anchor='nw', padx=20, pady=10)
+    tk.Button(expense_window, text="Υποβολή", command=on_submit).pack(anchor='nw', padx=20, pady=10)
 
+    # Διαχείριση κλεισίματος παραθύρου
     def on_close():
         global expense_window_ref
         expense_window_ref = None
         expense_window.destroy()
 
     expense_window.protocol("WM_DELETE_WINDOW", on_close)
+

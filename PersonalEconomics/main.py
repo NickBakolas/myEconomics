@@ -6,30 +6,29 @@ from models.expense import Expense
 import helpers as helpers
 
 
+# Εξαίρεση ειδικά για σφάλματα από την Main
 class MainError(Exception):
     pass
 
 
 class Main:
     def __init__(self):
-        self.db = database.Database()
-        self.categories = self.db.get_categories()
-        self.validator = Validator()
+        self.db = database.Database()                # Σύνδεση με βάση δεδομένων
+        self.categories = self.db.get_categories()   # Αποθήκευση κατηγοριών
+        self.validator = Validator()                 # Δημιουργία αντικειμένου για validation
+
+    # --------------------- Έσοδα ---------------------
 
     def add_income(self, income: Income):
         self.validator.errors.clear()
         income.date = helpers.format_date(income.date)
-        if not self.validator.validate_input(
-            self.categories, income.name, income.value, income.category, income.date
-        ):
+
+        # Έλεγχος εγκυρότητας δεδομένων εισόδου
+        if not self.validator.validate_input(self.categories, income.name, income.value, income.category, income.date):
             return helpers.error_response(self.validator.errors)
-        values = (
-            income.name,
-            income.value,
-            income.category,
-            income.monthly,
-            income.date,
-        )
+
+        values = (income.name, income.value, income.category, income.monthly, income.date)
+
         try:
             self.db.insert_income(values)
             return helpers.success_response(None)
@@ -46,12 +45,12 @@ class Main:
         except DatabaseError as error:
             raise MainError(f"Error: {error}")
 
-    def edit_income(
-        self, id, name=None, value=None, category=None, monthly=None, date=None
-    ):
+    def edit_income(self, id, name=None, value=None, category=None, monthly=None, date=None):
         self.validator.errors.clear()
         updates = []
         params = []
+
+        # Δημιουργία λίστας με πεδία προς ενημέρωση
         if name is not None:
             updates.append("Name = (?)")
             params.append(name)
@@ -67,11 +66,13 @@ class Main:
         if monthly is not None:
             updates.append("Monthly = (?)")
             params.append(monthly)
+
         params.append(id)
+
         if not updates:
             print("no updates")
             return
-        # validate inputs
+
         try:
             success, message = self.db.edit_income(updates, params)
             if not success:
@@ -85,26 +86,17 @@ class Main:
         except DatabaseError as error:
             raise MainError(f"Error: {error}")
 
-    def get_expense(self):
-        try:
-            return self.db.get_expenses()
-        except DatabaseError as error:
-            raise MainError(f"Error: {error}")
+    # --------------------- Έξοδα ---------------------
 
     def add_expense(self, expense: Expense):
         self.validator.errors.clear()
         expense.date = helpers.format_date(expense.date)
-        if not self.validator.validate_input(
-            self.categories, expense.name, expense.value, expense.category, expense.date
-        ):
+
+        if not self.validator.validate_input(self.categories, expense.name, expense.value, expense.category, expense.date):
             return helpers.error_response(self.validator.errors)
-        values = (
-            expense.name,
-            expense.value,
-            expense.category,
-            expense.monthly,
-            expense.date,
-        )
+
+        values = (expense.name, expense.value, expense.category, expense.monthly, expense.date)
+
         try:
             self.db.insert_expense(values)
             return helpers.success_response(None)
@@ -116,16 +108,15 @@ class Main:
         if not self.validator.validate_id(id):
             return helpers.error_response(self.validator.errors)
         try:
-            return helpers.success_response(None)
+            return helpers.success_response(None)  # ⚠️ Προσοχή: η db.delete_expense λείπει!
         except DatabaseError as error:
             raise MainError(f"Error: {error}")
 
-    def edit_expense(
-        self, id, name=None, value=None, category=None, monthly=None, date=None
-    ):
+    def edit_expense(self, id, name=None, value=None, category=None, monthly=None, date=None):
         self.validator.errors.clear()
         updates = []
         params = []
+
         if name is not None:
             updates.append("Name = (?)")
             params.append(name)
@@ -141,17 +132,27 @@ class Main:
         if monthly is not None:
             updates.append("Monthly = (?)")
             params.append(monthly)
+
         params.append(id)
+
         if not updates:
             print("no updates")
             return
-        # validate inputs
+
         try:
             success, message = self.db.edit_expense(updates, params)
             if not success:
                 print(message)
         except DatabaseError as error:
             raise MainError(f"Error: {error}")
+
+    def get_expense(self):
+        try:
+            return self.db.get_expenses()
+        except DatabaseError as error:
+            raise MainError(f"Error: {error}")
+
+    # --------------------- Κατηγορίες ---------------------
 
     def add_category(self, name):
         self.validator.errors.clear()
@@ -177,9 +178,7 @@ class Main:
 
     def edit_category(self, id, new_name):
         self.validator.errors.clear()
-        if not self.validator.validate_category_input(
-            new_name
-        ) or not self.validator.validate_id(id):
+        if not self.validator.validate_category_input(new_name) or not self.validator.validate_id(id):
             return helpers.error_response(self.validator.errors)
         try:
             self.db.edit_category(id, new_name)
@@ -188,10 +187,11 @@ class Main:
         except DatabaseError as error:
             raise MainError(f"Error: {error}")
 
+    # --------------------- Αναφορές - Φιλτραρισμένα Δεδομένα ---------------------
+
     def get_incomes_specific_month(self, month):
         self.validator.errors.clear()
         if not self.validator.validate_value(month):
-            print(self.validator.error)
             return helpers.error_response(self.validator.errors)
         try:
             return helpers.success_response(self.db.get_incomes_month(month))
@@ -201,7 +201,6 @@ class Main:
     def get_expenses_specific_month(self, month):
         self.validator.errors.clear()
         if not self.validator.validate_value(month):
-            print(self.validator.error)
             return helpers.error_response(self.validator.errors)
         try:
             return helpers.success_response(self.db.get_expenses_month(month))
@@ -213,7 +212,7 @@ class Main:
             return self.db.get_incomes_per_month()
         except DatabaseError as error:
             raise MainError(f"Error: {error}")
-            print()
+
     def get_expenses_per_month(self):
         try:
             return self.db.get_expenses_per_month()
@@ -223,7 +222,6 @@ class Main:
     def get_incomes_by_category(self, category_id):
         self.validator.errors.clear()
         if not self.validator.validate_category(category_id, self.categories):
-            print(self.validator.error)
             return helpers.error_response(self.validator.errors)
         try:
             return helpers.success_response(self.db.get_incomes_per_category(category_id))
@@ -233,7 +231,6 @@ class Main:
     def get_expenses_by_category(self, category_id):
         self.validator.errors.clear()
         if not self.validator.validate_category(category_id, self.categories):
-            print(self.validator.error)
             return helpers.error_response(self.validator.errors)
         try:
             return helpers.success_response(self.db.get_expenses_per_category(category_id))
@@ -243,7 +240,6 @@ class Main:
     def get_incomes_by_date(self, date):
         self.validator.errors.clear()
         if not self.validator.validate_date(date):
-            print(self.validator.errors)
             return helpers.error_response(self.validator.errors)
         date = helpers.format_date(date)
         try:
@@ -254,7 +250,6 @@ class Main:
     def get_expenses_by_date(self, date):
         self.validator.errors.clear()
         if not self.validator.validate_date(date):
-            print(self.validator.errors)
             return helpers.error_response(self.validator.errors)
         date = helpers.format_date(date)
         try:
@@ -280,22 +275,7 @@ class Main:
         except DatabaseError as error:
             raise MainError(f"Error: {error}")
 
-    def refresh_chart1(self):
-        from monthly_expenses_chart import create_chart1
-        if self.chart_widget1:
-            self.chart_widget1.destroy()
-        self.chart_widget1 = create_chart1(self.chart_frame, self)
-        self.chart_widget1.grid(sticky="nsew")
+# Εκκίνηση της εφαρμογής αν το αρχείο τρέξει αυτόνομα
+if __name__ == "__main__":
+    app = Main()
 
-
-# if __name__ == "__main__":
-#     app = Main()
-#     # app.add_category("paok")
-#     income = Income("paok", "300", 1, False, "3-4-2012")
-#     app.add_income(income)
-#     # print(app.get_incomes_specific_month(5))
-#     # print(app.get_income())
-#     # print(app.categories)
-#     print(app.get_incomes_by_date("3-4-2012"))
-#     # print(app.get_incomes_by_category(1))
-#     # print(app.get_incomes_per_month())

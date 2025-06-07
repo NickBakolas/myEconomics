@@ -17,7 +17,7 @@ def submit_income(main_app, name, amount, category_id, date, is_recurring):
         messagebox.showerror("Σφάλμα", "Το ποσό πρέπει να είναι αριθμός.")
         return
 
-    # ✅ Διορθωμένη μετατροπή ημερομηνίας
+    # Διορθωμένη μετατροπή ημερομηνίας
     if isinstance(date, str):
         try:
             date = datetime.strptime(date, "%d-%m-%Y").strftime("%Y-%m-%d")

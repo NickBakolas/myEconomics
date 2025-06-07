@@ -498,7 +498,7 @@ class Database:
         return income
 
 
-# test cases
+
 if __name__ == "__main__":
     db = Database()
     db.insert_category(("frouta"))

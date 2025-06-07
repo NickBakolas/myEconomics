@@ -2,11 +2,11 @@
 
 
 a = Analysis(
-    ['main.py'],
+    ['mainUI.py'],
     pathex=[],
     binaries=[],
-    datas=[('assets', 'assets'), ('C:/Users/bakol/AppData/Local/Programs/Python/Python311/tcl/tcl8.6', 'tcl/tcl8.6'), ('C:/Users/bakol/AppData/Local/Programs/Python/Python311/tcl/tk8.6', 'tcl/tk8.6')],
-    hiddenimports=['tkinter'],
+    datas=[],
+    hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='main',
+    name='mainUI',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -35,5 +35,4 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['assets\\coin.ico'],
 )
