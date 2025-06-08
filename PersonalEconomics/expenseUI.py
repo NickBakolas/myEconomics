@@ -5,6 +5,7 @@ from datetime import datetime
 from models.expense import Expense
 from category_manager import open_category_manager
 from helpers import refresh_all_charts
+from PIL import Image, ImageTk
 
 # Μεταβλητή αναφοράς στο παράθυρο, ώστε να μην ανοίγει δεύτερη φορά
 expense_window_ref = None
@@ -16,18 +17,19 @@ def submit_expense(main_app, name, amount, category_id, date, is_recurring):
     Περιλαμβάνει έλεγχο εγκυρότητας ποσού και μορφής ημερομηνίας.
     """
     try:
-        value = float(amount)
+        value = float(amount)  # Μετατροπή του ποσού σε float
     except ValueError:
         messagebox.showerror("Σφάλμα", "Το ποσό πρέπει να είναι αριθμός.")
         return
 
+    # Αν η ημερομηνία είναι σε μορφή string, μετατρέπεται στο κατάλληλο format
     if isinstance(date, str):
         try:
-            # Αν η ημερομηνία είναι string, την μετατρέπουμε σε format yyyy-mm-dd
             date = datetime.strptime(date, "%d-%m-%Y").strftime("%Y-%m-%d")
         except ValueError:
-            pass  # Αν ήδη έχει σωστό format, δεν κάνουμε τίποτα
+            pass  # Αν είναι ήδη σε σωστή μορφή, την αφήνουμε ως έχει
 
+    # Δημιουργία αντικειμένου Expense
     expense = Expense(
         name=name,
         value=value,
@@ -36,6 +38,7 @@ def submit_expense(main_app, name, amount, category_id, date, is_recurring):
         date=date
     )
 
+    # Προσθήκη δαπάνης μέσω της κύριας εφαρμογής
     try:
         res = main_app.add_expense(expense)
         if not res["success"]:
@@ -60,15 +63,22 @@ def open_expense_window(main_app):
 
     # Δημιουργία νέου παραθύρου
     expense_window = tk.Toplevel()
+    expense_window.grab_set()  # Κάνε το παράθυρο modal
     expense_window_ref = expense_window
     expense_window.title("Καταχώρηση Δαπάνης")
     expense_window.configure(bg="white")
+
+    # Ορισμός εικονιδίου παραθύρου
+    icon_path = "assets/expense.png"
+    icon_image = Image.open(icon_path)
+    icon_photo = ImageTk.PhotoImage(icon_image)
+    expense_window.iconphoto(False, icon_photo)
 
     # Επικεφαλίδα
     tk.Label(expense_window, text="Καταχώρηση νέας δαπάνης", font=("Arial", 16, "bold"), bg="white").pack(anchor='nw', padx=20, pady=15)
 
     # Πεδία εισαγωγής
-    tk.Label(expense_window, text="Ονομα:", bg="white").pack(anchor='nw', padx=20)
+    tk.Label(expense_window, text="Περιγραφή:", bg="white").pack(anchor='nw', padx=20)
     name_var = tk.StringVar()
     ttk.Entry(expense_window, textvariable=name_var).pack(anchor='nw', padx=20, pady=5)
 
@@ -87,13 +97,13 @@ def open_expense_window(main_app):
         categories = main_app.categories
         category_entry['values'] = [cat[1] for cat in categories] + ["➕ Διαχείριση κατηγοριών"]
 
-    refresh_categories()
+    refresh_categories()  # Αρχική φόρτωση των κατηγοριών
 
     # Άνοιγμα παραθύρου διαχείρισης κατηγοριών αν επιλεγεί η ειδική επιλογή
     def on_category_select(event):
         if category_var.get() == "➕ Διαχείριση κατηγοριών":
             open_category_manager(main_app, refresh_categories)
-            category_var.set("")
+            category_var.set("")  # Καθαρισμός πεδίου
 
     category_entry.bind("<<ComboboxSelected>>", on_category_select)
 
@@ -117,20 +127,23 @@ def open_expense_window(main_app):
         # Εύρεση ID κατηγορίας με βάση το όνομα
         category_id = next((cat[0] for cat in main_app.categories if cat[1] == category_name), None)
 
+        # Έλεγχος αν έχουν συμπληρωθεί τα απαραίτητα πεδία
         if not amount or not category_id:
             messagebox.showwarning("Σφάλμα", "Συμπληρώστε όλα τα πεδία.")
             return
 
+        # Καταχώρηση της δαπάνης
         submit_expense(main_app, name, amount, category_id, date, is_recurring)
-        refresh_all_charts(main_app)
-        expense_window.destroy()
+        refresh_all_charts(main_app)  # Ενημέρωση γραφημάτων
+        expense_window.destroy()  # Κλείσιμο παραθύρου
 
+    # Κουμπί Υποβολής
     tk.Button(expense_window, text="Υποβολή", command=on_submit).pack(anchor='nw', padx=20, pady=10)
 
     # Διαχείριση κλεισίματος παραθύρου
     def on_close():
         global expense_window_ref
-        expense_window_ref = None
+        expense_window_ref = None  # Καθαρισμός αναφοράς
         expense_window.destroy()
 
     expense_window.protocol("WM_DELETE_WINDOW", on_close)

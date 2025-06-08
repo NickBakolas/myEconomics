@@ -11,7 +11,7 @@ from export_excel import export_data  # Εξαγωγή δεδομένων σε E
 from datetime import datetime  # Για μετατροπή/διαχείριση ημερομηνιών
 from daily_chart import daily_bar_chart  # Ημερήσιο γράφημα
 from Expenses_managment import open_expenses_details_window  # Παράθυρο διαχείρισης εξόδων
-from incomes_managment import open_income_details_window  # Παράθυρο διαχείρισης εσόδων
+from incomes_managment import open_incomes_details_window  # Παράθυρο διαχείρισης εσόδων
 
 # Δημιουργία instance της βασικής κλάσης εφαρμογής
 main_app = Main()
@@ -67,6 +67,15 @@ def create_inner_frames(parent):
 root = tk.Tk()
 root.title("myEconomics")
 
+# Ορισμός αρχικού μεγέθους και κεντράρισμα
+window_width = 1280
+window_height = 800
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+x = int((screen_width - window_width) / 2)
+y = int((screen_height - window_height) / 2)
+root.geometry(f"{window_width}x{window_height}+{x}+{y}")
+
 # Ορισμός εικονιδίου παραθύρου
 icon_path = "assets/coin.png"
 icon_image = Image.open(icon_path)
@@ -120,9 +129,9 @@ tk.Button(frame_left_top, text="Καταχώρηση δαπανών",
           command=lambda: open_expense_window(main_app)).pack(fill='x', pady=15)
 
 tk.Button(frame_left_top, text="Διαχείριση Εσόδων",
-          command=lambda: open_income_details_window(main_app)).pack(fill='x', pady=15)
+          command=lambda: open_incomes_details_window(main_app)).pack(fill='x', pady=15)
 
-tk.Button(frame_left_top, text="Διαχείριση Εξόδων",
+tk.Button(frame_left_top, text="Διαχείριση Δαπανών",
           command=lambda: open_expenses_details_window(main_app)).pack(fill='x', pady=15)
 
 tk.Button(frame_left_top, text="Export data",
