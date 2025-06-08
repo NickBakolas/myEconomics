@@ -72,6 +72,7 @@ def open_incomes_details_window(main_app):
             try:
                 main_app.delete_income(income_id)
                 load_data()
+                main_app.refresh_all_charts()
             except Exception as e:
                 messagebox.showerror("Σφάλμα", f"Σφάλμα διαγραφής: {e}")
 
@@ -161,6 +162,7 @@ def open_incomes_details_window(main_app):
                 edit_win.destroy()
                 edit_income_win_ref = None
                 load_data()
+                main_app.refresh_all_charts()
             except Exception as e:
                 messagebox.showerror("Σφάλμα", f"Αποτυχία αποθήκευσης αλλαγών: {e}")
 

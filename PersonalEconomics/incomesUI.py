@@ -39,10 +39,6 @@ def submit_income(main_app, name, amount, category_id, date, is_recurring):
             msg = '\n'.join(res['errors'])  # Συλλογή μηνυμάτων σφάλματος
             messagebox.showerror("Error",  msg)
             return
-        main_app.refresh_chart1()  # Ενημέρωση γραφήματος
-        print(
-            f"✅ Καταχωρήθηκε: {value}€ - Κατηγορία ID {category_id} - {date}")
-        messagebox.showinfo("Επιτυχία", "To έσοδο καταχωρήθηκε με επιτυχία!")
 
     except Exception as e:
         messagebox.showerror("Σφάλμα", str(e))  # Σφάλμα κατά την καταχώρηση

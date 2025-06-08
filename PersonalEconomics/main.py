@@ -108,7 +108,8 @@ class Main:
         if not self.validator.validate_id(id):
             return helpers.error_response(self.validator.errors)
         try:
-            return helpers.success_response(None)  # ⚠️ Προσοχή: η db.delete_expense λείπει!
+            self.db.delete_expense(id)
+            return helpers.success_response(None)
         except DatabaseError as error:
             raise MainError(f"Error: {error}")
 
@@ -274,6 +275,7 @@ class Main:
             return helpers.success_response(self.db.get_expense_by_id(id))
         except DatabaseError as error:
             raise MainError(f"Error: {error}")
+
 
 # Εκκίνηση της εφαρμογής αν το αρχείο τρέξει αυτόνομα
 if __name__ == "__main__":
