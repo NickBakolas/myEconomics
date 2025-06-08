@@ -1,12 +1,22 @@
 import tkinter as tk
 from tkinter import messagebox, simpledialog
+import helpers as helpers
+from helpers import refresh_all_charts
+from PIL import Image, ImageTk
 
 def open_category_manager(main_app, refresh_callback=None):
     # Δημιουργία νέου παραθύρου για τη διαχείριση κατηγοριών
     win = tk.Toplevel()
+    win.grab_set()  # Κάνε το παράθυρο modal
     win.title("Διαχείριση Κατηγοριών")
     win.geometry("300x400")
     win.configure(bg="white")
+
+    # Ορισμός εικονιδίου παραθύρου
+    icon_path = "assets/coin.png"
+    icon_image = Image.open(icon_path)
+    icon_photo = ImageTk.PhotoImage(icon_image)
+    win.iconphoto(False, icon_photo)
 
     # Λίστα εμφάνισης των κατηγοριών
     category_listbox = tk.Listbox(win)
@@ -19,7 +29,7 @@ def open_category_manager(main_app, refresh_callback=None):
             category_listbox.insert(tk.END, f"{cat[0]} - {cat[1]}")  # cat[0] = id, cat[1] = όνομα
         if refresh_callback:
             refresh_callback()  # Ενημέρωση άλλου τμήματος της εφαρμογής (αν δόθηκε)
-
+        refresh_all_charts(main_app)
     def add_category():
         # Εισαγωγή νέας κατηγορίας μέσω διαλόγου
         name = simpledialog.askstring("Νέα Κατηγορία", "Όνομα:")
@@ -59,3 +69,4 @@ def open_category_manager(main_app, refresh_callback=None):
 
     # Αρχική φόρτωση κατηγοριών
     refresh()
+

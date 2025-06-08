@@ -31,6 +31,7 @@ def error_response(errors):
 from expenses_chart import create_chart1
 from month_chart import create_chart2
 from incomes_chart import create_chart3
+from daily_chart import daily_bar_chart
 
 
 def refresh_chart1(app):
@@ -60,8 +61,18 @@ def refresh_chart3(app):
         app.chart_widget3 = create_chart3(app.chart_frame3, app)
         app.chart_widget3.grid(row=0, column=0, sticky="nsew")
 
+def refresh_daily_chart(app):
+    if hasattr(app, "daily_chart_widget") and app.daily_chart_widget:
+        app.daily_chart_widget.destroy()
+
+    if hasattr(app, "daily_chart_frame") and hasattr(app, "calendar"):
+        selected_date_str = app.calendar.get_date()
+        selected_date = datetime.strptime(selected_date_str, "%d-%m-%Y").strftime("%Y-%m-%d")
+        app.daily_chart_widget = daily_bar_chart(app.daily_chart_frame, app, selected_date)
+        app.daily_chart_widget.grid(row=0, column=0, sticky="nsew")
 
 def refresh_all_charts(app):
     refresh_chart1(app)
     refresh_chart2(app)
     refresh_chart3(app)
+    refresh_daily_chart(app)

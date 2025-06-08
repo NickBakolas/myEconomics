@@ -36,7 +36,7 @@ def create_chart1(master, main_app):
     ax.set_title("Έξοδα ανά Κατηγορία", loc='left')        # Τίτλος γραφήματος
     ax.set_ylabel("Ευρώ")                                  # Ετικέτα άξονα Υ
     ax.set_xticks(range(len(categories)))                  # Σημεία στον Χ άξονα
-    ax.set_xticklabels(categories, rotation=30, ha='right')  # Ονόματα κατηγοριών
+    ax.set_xticklabels(categories, rotation=20, ha='right')  # Ονόματα κατηγοριών
 
     # Εμφάνιση τιμών πάνω από κάθε μπάρα
     for bar in bars:

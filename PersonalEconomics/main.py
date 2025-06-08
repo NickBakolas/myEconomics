@@ -4,7 +4,9 @@ from validator import Validator
 from models.income import Income
 from models.expense import Expense
 import helpers as helpers
-
+from expenses_chart import create_chart1
+from month_chart import create_chart2
+from incomes_chart import create_chart3
 
 # Εξαίρεση ειδικά για σφάλματα από την Main
 class MainError(Exception):
@@ -275,6 +277,20 @@ class Main:
             return helpers.success_response(self.db.get_expense_by_id(id))
         except DatabaseError as error:
             raise MainError(f"Error: {error}")
+
+    def refresh_chart(self, widget_attr, frame_attr, create_func):
+        if hasattr(self, widget_attr) and getattr(self, widget_attr):
+            getattr(self, widget_attr).destroy()
+
+        if hasattr(self, frame_attr):
+            new_chart = create_func(getattr(self, frame_attr), self)
+            setattr(self, widget_attr, new_chart)
+            new_chart.grid(row=0, column=0, sticky="nsew")
+
+    def refresh_all_charts(self):
+        self.refresh_chart("chart_widget1", "chart_frame1", create_chart1)
+        self.refresh_chart("chart_widget2", "chart_frame2", create_chart2)
+        self.refresh_chart("chart_widget3", "chart_frame3", create_chart3)
 
 
 # Εκκίνηση της εφαρμογής αν το αρχείο τρέξει αυτόνομα

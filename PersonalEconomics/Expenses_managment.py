@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 
+from helpers import refresh_all_charts
+
 # Μεταβλητή αναφοράς για αποφυγή διπλού ανοίγματος του παραθύρου
 expense_window_ref = None
 
@@ -75,7 +77,7 @@ def open_expenses_details_window(main_app):
             try:
                 main_app.delete_expense(expense_id)
                 load_data()
-                main_app.refresh_all_charts()
+                refresh_all_charts(main_app)
             except Exception as e:
                 messagebox.showerror("Σφάλμα", f"Σφάλμα διαγραφής: {e}")
 
@@ -152,25 +154,24 @@ def open_expenses_details_window(main_app):
                 new_category_name = category_combo.get()
                 if new_category_name not in reverse_category_map:
                     raise ValueError("Μη έγκυρη κατηγορία.")
-
                 # Ενημέρωση μέσω main_app
                 main_app.edit_expense(
                     expense_id,
-                    name=name_entry.get(),
-                    value=float(value_entry.get()),
-                    date=date_entry.get(),
-                    category=new_category_name,
-                    monthly=monthly_var.get()
+                    category=reverse_category_map[new_category_name],
                 )
                 edit_win.destroy()
                 edit_expense_win_ref = None
                 load_data()
-                main_app.refresh_all_charts()
+                refresh_all_charts(main_app)
             except Exception as e:
-                messagebox.showerror("Σφάλμα", f"Αποτυχία αποθήκευσης αλλαγών: {e}")
+                messagebox.showerror(
+                    "Σφάλμα", f"Αποτυχία αποθήκευσης αλλαγών: {e}")
 
         # Κουμπί αποθήκευσης
-        tk.Button(edit_win, text="Αποθήκευση", command=save_changes).pack(pady=10)
+        tk.Button(edit_win, text="Αποθήκευση",
+                  command=save_changes).pack(pady=10)
+
+
 
     # === Κουμπιά επεξεργασίας/διαγραφής ===
     btn_frame = tk.Frame(window)

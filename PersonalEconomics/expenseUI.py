@@ -63,7 +63,6 @@ def open_expense_window(main_app):
 
     # Δημιουργία νέου παραθύρου
     expense_window = tk.Toplevel()
-    expense_window.grab_set()  # Κάνε το παράθυρο modal
     expense_window_ref = expense_window
     expense_window.title("Καταχώρηση Δαπάνης")
     expense_window.configure(bg="white")

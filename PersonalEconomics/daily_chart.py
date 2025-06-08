@@ -1,7 +1,7 @@
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import tkinter as tk
-import helpers
+import helpers as helpers
 
 def daily_bar_chart(parent, main_instance, date):
     date = helpers.format_date(date)

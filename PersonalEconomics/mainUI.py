@@ -68,7 +68,7 @@ root = tk.Tk()
 root.title("myEconomics")
 
 # Ορισμός αρχικού μεγέθους και κεντράρισμα
-window_width = 1280
+window_width = 1300
 window_height = 800
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
@@ -123,19 +123,19 @@ on_date_selected()
 
 # Κουμπιά για βασικές λειτουργίες (εισαγωγή, διαχείριση, εξαγωγή)
 tk.Button(frame_left_top, text="Καταχώρηση εσόδων",
-          command=lambda: open_incomes_window(main_app)).pack(fill='x', pady=15)
+          command=lambda: open_incomes_window(main_app)).pack(fill='y', pady=15)
 
 tk.Button(frame_left_top, text="Καταχώρηση δαπανών",
-          command=lambda: open_expense_window(main_app)).pack(fill='x', pady=15)
+          command=lambda: open_expense_window(main_app)).pack(fill='y', pady=15)
 
 tk.Button(frame_left_top, text="Διαχείριση Εσόδων",
-          command=lambda: open_incomes_details_window(main_app)).pack(fill='x', pady=15)
+          command=lambda: open_incomes_details_window(main_app)).pack(fill='y', pady=15)
 
 tk.Button(frame_left_top, text="Διαχείριση Δαπανών",
-          command=lambda: open_expenses_details_window(main_app)).pack(fill='x', pady=15)
+          command=lambda: open_expenses_details_window(main_app)).pack(fill='y', pady=15)
 
 tk.Button(frame_left_top, text="Export data",
-          command=lambda: export_data(main_app)).pack(fill='x', pady=15)
+          command=lambda: export_data(main_app)).pack(fill='y', pady=15)
 
 # Δημιουργία και τοποθέτηση γραφημάτων στα αντίστοιχα frames
 chart_widget3 = create_chart3(frame3, main_app)
@@ -154,6 +154,12 @@ daily_chart_widget.grid(row=0, column=0, sticky="nsew")
 main_app.chart_frame1 = frame4
 main_app.chart_frame2 = frame2
 main_app.chart_frame3 = frame3
+
+# Αντιστοίχιση ημερολογίου, frame και chart στο main_app για ανανέωση από αλλού
+main_app.calendar = calendar
+main_app.daily_chart_frame = frame_left_bottom
+main_app.daily_chart_widget = daily_chart_widget
+
 
 # Εκκίνηση του GUI loop
 root.mainloop()

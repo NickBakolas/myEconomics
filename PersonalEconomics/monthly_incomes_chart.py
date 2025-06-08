@@ -3,6 +3,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from collections import defaultdict
 import tkinter as tk  # Βεβαιώσου ότι έχει γίνει import
 
+
 def create_chart3(master, main_app):
     try:
         raw_data = main_app.get_income()
@@ -21,7 +22,7 @@ def create_chart3(master, main_app):
     for entry in raw_data:
         try:
             _, _, value, category_id, _, _ = entry
-            category_name = category_map.get(category_id, "Άγνωστη Κατηγορία")
+            category_name = category_map.get(category_id, "Άλλα")
             income_by_category[category_name] += float(value)
         except Exception as e:
             print(f"Παράλειψη εγγραφής λόγω σφάλματος: {e}")
@@ -46,7 +47,7 @@ def create_chart3(master, main_app):
            shadow=True,
            radius=0.9)
     ax.axis('equal')
-    plt.title("Μηνιαία Έσοδα ανά Κατηγορία", loc= 'left')
+    plt.title("Μηνιαία Έσοδα ανά Κατηγορία", loc='left')
 
     # Δημιουργία container και τοποθέτηση του καμβά
     container = tk.Frame(master)
@@ -57,11 +58,3 @@ def create_chart3(master, main_app):
     canvas.get_tk_widget().pack(fill='both', expand=True)
 
     return container
-
-
-
-
-
-
-
-
